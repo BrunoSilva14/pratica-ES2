@@ -1,0 +1,47 @@
+# Nome do workflow que aparecerá na aba "Actions" do GitHub
+name: Python CI/CD
+
+# Tarefa 2: Define quando o workflow deve rodar
+on:
+  push:
+    branches: [ "main" ] # Roda em pushes para a branch 'main'
+  pull_request:
+    branches: [ "main" ] # Roda em pull requests para a 'main'
+
+jobs:
+  # Nome do job (pode ser qualquer nome)
+  build-and-test:
+    
+    # A "estratégia de matriz" é a chave para as tarefas 3 e 4
+    strategy:
+      matrix:
+        # Tarefa 3: Executar nos três sistemas operacionais
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+        # Tarefa 4: Executar em (pelo menos) duas versões do Python
+        python-version: ['3.9', '3.11']
+
+    # Define o sistema operacional para este job, baseado na matriz
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # 1. Baixa o código do seu repositório para a máquina virtual
+      - name: Check-out repository code
+        uses: actions/checkout@v4
+
+      # 2. Configura a versão do Python específica (vinda da matriz)
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 3. Instala as dependências (pytest)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # 4. Executa os testes usando pytest
+      - name: Run tests
+        run: |
+          pytest
